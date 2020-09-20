@@ -1,20 +1,21 @@
 package com.accounting.accountingapi.exception.dto;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class ErrorResponseDTO {
 
-    private String userMessage;
-    private String traceMessage;
+    private List<String> messages;
 
-    public ErrorResponseDTO(String userMessage, String traceMessage) {
-        this.userMessage = userMessage;
-        this.traceMessage = traceMessage;
+    public ErrorResponseDTO(String... messages) {
+        this.messages = Arrays.asList(messages);
     }
 
-    public String getUserMessage() {
-        return userMessage;
+    public ErrorResponseDTO(List<String> messages) {
+        this.messages = messages;
     }
 
-    public String getTraceMessage() {
-        return traceMessage;
+    public List<String> getMessages() {
+        return messages;
     }
 }

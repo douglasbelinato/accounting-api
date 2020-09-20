@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class CategoryResource {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpEntity<?> save(@RequestBody Category category, HttpServletResponse response) {
+    public HttpEntity<?> save(@Valid @RequestBody Category category, HttpServletResponse response) {
         Category categorySaved = categoryService.save(category);
 
         // URI to build Location header in HTTP response 201 (created)
