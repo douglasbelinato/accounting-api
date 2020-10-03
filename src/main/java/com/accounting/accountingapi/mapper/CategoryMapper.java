@@ -1,14 +1,16 @@
 package com.accounting.accountingapi.mapper;
 
-import com.accounting.accountingapi.resource.dto.request.CategoryRequestDTO;
-import com.accounting.accountingapi.service.vo.CategoryVO;
+import com.accounting.accountingapi.repository.model.Category;
+import com.accounting.accountingapi.resource.dto.CategoryDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
-public interface CategoryVOMapper {
+@Mapper(componentModel = "spring")
+public interface CategoryMapper { //NOSONAR
 
-    CategoryVOMapper INSTANCE = Mappers.getMapper(CategoryVOMapper.class);
+    CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
-    CategoryVO map(CategoryRequestDTO dto);
+    CategoryDTO fromModelToDto(Category category);
+
+    Category fromDtoToModel(CategoryDTO dto);
 }
