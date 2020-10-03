@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AccountingApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AccountingApiApplication.class, args);
+        SpringApplication.run(AccountingApiApplication.class);
     }
 
 }

@@ -26,8 +26,8 @@ public class AccountingApiExceptionHandler extends ResponseEntityExceptionHandle
     private MessageSource messageSource;
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity.HeadersBuilder<?> handleNotFoundException() {
-        return ResponseEntity.notFound();
+    public ResponseEntity<Object> handleNotFoundException() {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @Override
