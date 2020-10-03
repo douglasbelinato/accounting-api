@@ -1,6 +1,8 @@
 package com.accounting.accountingapi.resource;
 
-import com.accounting.accountingapi.model.Category;
+import com.accounting.accountingapi.mapper.CategoryMapper;
+import com.accounting.accountingapi.repository.model.Category;
+import com.accounting.accountingapi.resource.dto.CategoryDTO;
 import com.accounting.accountingapi.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -21,6 +23,9 @@ public class CategoryResource {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private CategoryMapper categoryMapper;
+
     @GetMapping
     public List<Category> findAll() {
         return categoryService.findAll();
@@ -28,8 +33,8 @@ public class CategoryResource {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpEntity<?> save(@Valid @RequestBody Category category, HttpServletResponse response) {
-        Category categorySaved = categoryService.save(category);
+    public HttpEntity<CategoryDTO> save(@Valid @RequestBody CategoryDTO dto, HttpServletResponse response) {
+        CategoryDTO categorySaved = categoryMapper.fromModelToDto(categoryService.save(categoryMapper.fromDtoToModel(dto)));
 
         // URI to build Location header in HTTP response 201 (created)
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(categorySaved.getId()).toUri();
@@ -38,7 +43,8 @@ public class CategoryResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok().body(categoryService.findById(id));
+    public ResponseEntity<CategoryDTO> findById(@PathVariable("id") Long id) {
+        Category category = categoryService.findById(Category.builder().id(id).build());
+        return ResponseEntity.ok().body(categoryMapper.fromModelToDto(category));
     }
 }
