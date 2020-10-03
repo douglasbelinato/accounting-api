@@ -1,6 +1,6 @@
 package com.accounting.accountingapi.repository;
 
-import com.accounting.accountingapi.model.Category;
+import com.accounting.accountingapi.repository.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

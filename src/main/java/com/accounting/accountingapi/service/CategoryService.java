@@ -1,15 +1,14 @@
 package com.accounting.accountingapi.service;
 
-import com.accounting.accountingapi.model.Category;
+import com.accounting.accountingapi.repository.model.Category;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CategoryService {
 
     List<Category> findAll();
 
-    Category findById(Long id);
+    Category findById(Category category);
 
     Category save(Category category);
 
