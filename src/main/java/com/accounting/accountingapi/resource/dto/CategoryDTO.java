@@ -9,8 +9,10 @@ import javax.validation.constraints.Size;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CategoryDTO {
 
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank

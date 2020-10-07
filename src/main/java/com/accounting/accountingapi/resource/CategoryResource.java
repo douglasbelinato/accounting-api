@@ -31,8 +31,13 @@ public class CategoryResource {
         return categoryService.findAll();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryDTO> findById(@PathVariable("id") Long id) {
+        Category category = categoryService.findById(id);
+        return ResponseEntity.ok().body(categoryMapper.fromModelToDto(category));
+    }
+
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<CategoryDTO> save(@Valid @RequestBody CategoryDTO dto, HttpServletResponse response) {
         CategoryDTO categorySaved = categoryMapper.fromModelToDto(categoryService.save(categoryMapper.fromDtoToModel(dto)));
 
@@ -40,11 +45,5 @@ public class CategoryResource {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(categorySaved.getId()).toUri();
 
         return ResponseEntity.created(uri).body(categorySaved);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoryDTO> findById(@PathVariable("id") Long id) {
-        Category category = categoryService.findById(Category.builder().id(id).build());
-        return ResponseEntity.ok().body(categoryMapper.fromModelToDto(category));
     }
 }
