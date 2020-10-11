@@ -1,6 +1,6 @@
 package com.accounting.accountingapi.exception.handler;
 
-import com.accounting.accountingapi.exception.NotFoundException;
+import com.accounting.accountingapi.exception.ResourceNotFoundException;
 import com.accounting.accountingapi.exception.dto.ErrorResponseDTO;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class AccountingApiExceptionHandler extends ResponseEntityExceptionHandle
     @Autowired
     private MessageSource messageSource;
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleNotFoundException() {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

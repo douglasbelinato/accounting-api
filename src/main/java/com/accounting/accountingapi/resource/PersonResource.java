@@ -50,4 +50,10 @@ public class PersonResource {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(personSaved);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+         personService.delete(id);
+    }
 }

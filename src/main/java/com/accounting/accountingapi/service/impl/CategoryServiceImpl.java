@@ -1,6 +1,6 @@
 package com.accounting.accountingapi.service.impl;
 
-import com.accounting.accountingapi.exception.NotFoundException;
+import com.accounting.accountingapi.exception.ResourceNotFoundException;
 import com.accounting.accountingapi.repository.CategoryRepository;
 import com.accounting.accountingapi.repository.model.Category;
 import com.accounting.accountingapi.service.CategoryService;
@@ -22,7 +22,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findById(Long id) {
-        return categoryRepository.findById(id).orElseThrow(NotFoundException::new);
+        return categoryRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
