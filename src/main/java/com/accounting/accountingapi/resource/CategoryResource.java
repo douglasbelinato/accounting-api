@@ -1,19 +1,19 @@
 package com.accounting.accountingapi.resource;
 
+import com.accounting.accountingapi.event.ResourceCreatedEvent;
 import com.accounting.accountingapi.mapper.CategoryMapper;
 import com.accounting.accountingapi.repository.model.Category;
 import com.accounting.accountingapi.resource.dto.CategoryDTO;
 import com.accounting.accountingapi.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -26,6 +26,9 @@ public class CategoryResource {
     @Autowired
     private CategoryMapper categoryMapper;
 
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @GetMapping
     public List<Category> findAll() {
         return categoryService.findAll();
@@ -33,17 +36,16 @@ public class CategoryResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoryDTO> findById(@PathVariable("id") Long id) {
-        Category category = categoryService.findById(id);
+        var category = categoryService.findById(id);
         return ResponseEntity.ok().body(categoryMapper.fromModelToDto(category));
     }
 
     @PostMapping
     public HttpEntity<CategoryDTO> save(@Valid @RequestBody CategoryDTO dto, HttpServletResponse response) {
-        CategoryDTO categorySaved = categoryMapper.fromModelToDto(categoryService.save(categoryMapper.fromDtoToModel(dto)));
+        var categorySaved = categoryMapper.fromModelToDto(categoryService.save(categoryMapper.fromDtoToModel(dto)));
 
-        // URI to build Location header in HTTP response 201 (created)
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(categorySaved.getId()).toUri();
+        applicationEventPublisher.publishEvent(new ResourceCreatedEvent(this, response, categorySaved.getId()));
 
-        return ResponseEntity.created(uri).body(categorySaved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(categorySaved);
     }
 }

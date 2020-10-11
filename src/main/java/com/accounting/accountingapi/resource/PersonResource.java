@@ -1,5 +1,6 @@
 package com.accounting.accountingapi.resource;
 
+import com.accounting.accountingapi.event.ResourceCreatedEvent;
 import com.accounting.accountingapi.mapper.PersonMapper;
 import com.accounting.accountingapi.repository.model.Category;
 import com.accounting.accountingapi.repository.model.Person;
@@ -7,10 +8,13 @@ import com.accounting.accountingapi.resource.dto.CategoryDTO;
 import com.accounting.accountingapi.resource.dto.PersonDTO;
 import com.accounting.accountingapi.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -24,6 +28,9 @@ public class PersonResource {
     @Autowired
     private PersonMapper personMapper;
 
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @GetMapping
     public ResponseEntity<List<PersonDTO>> findAll() {
         return ResponseEntity.ok().body(personMapper.fromModelListToDtoList(personService.findAll()));
@@ -31,16 +38,16 @@ public class PersonResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<PersonDTO> findById(@PathVariable("id") Long id) {
-        Person person = personService.findById(id);
+        var person = personService.findById(id);
         return ResponseEntity.ok().body(personMapper.fromModelToDto(person));
     }
 
     @PostMapping
-    public ResponseEntity<PersonDTO> save(@Valid @RequestBody PersonDTO personDTO) {
+    public ResponseEntity<PersonDTO> save(@Valid @RequestBody PersonDTO personDTO, HttpServletResponse response) {
         var personSaved = personMapper.fromModelToDto(personService.save(personMapper.fromDtoToModel(personDTO)));
 
-        var uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(personSaved.getId()).toUri();
+        applicationEventPublisher.publishEvent(new ResourceCreatedEvent(this, response, personSaved.getId()));
 
-        return ResponseEntity.created(uri).body(personSaved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(personSaved);
     }
 }
