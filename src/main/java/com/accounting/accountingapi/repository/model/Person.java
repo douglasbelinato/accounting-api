@@ -8,8 +8,11 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "person")
 @Builder
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Person {
 

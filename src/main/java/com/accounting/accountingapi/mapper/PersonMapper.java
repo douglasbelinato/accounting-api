@@ -2,6 +2,7 @@ package com.accounting.accountingapi.mapper;
 
 import com.accounting.accountingapi.repository.model.Person;
 import com.accounting.accountingapi.resource.dto.PersonDTO;
+import com.accounting.accountingapi.resource.dto.PersonPartialUpdateDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -12,10 +13,12 @@ public interface PersonMapper { // NOSONAR
 
     PersonMapper INSTANCE = Mappers.getMapper(PersonMapper.class);
 
-    PersonDTO fromModelToDto(Person person);
+    PersonDTO fromPersonModelToPersonDto(Person person);
 
-    List<PersonDTO> fromModelListToDtoList(List<Person> people);
+    PersonPartialUpdateDTO fromPersonModelToPersonPatchDto(Person person);
 
-    Person fromDtoToModel(PersonDTO dto);
+    List<PersonDTO> fromPersonModelListToPersonDtoList(List<Person> people);
+
+    Person fromPersonDtoToPersonModel(PersonDTO dto);
 
 }

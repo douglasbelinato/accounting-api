@@ -11,6 +11,7 @@ import javax.persistence.Embeddable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Address {
 
     private String street;

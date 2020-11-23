@@ -1,11 +1,11 @@
 package com.accounting.accountingapi.exception.handler;
 
+import com.accounting.accountingapi.exception.EmptyBodyException;
 import com.accounting.accountingapi.exception.ResourceNotFoundException;
 import com.accounting.accountingapi.exception.dto.ErrorResponseDTO;
+import com.accounting.accountingapi.util.MessageUtil;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,36 +23,60 @@ import java.util.stream.Collectors;
 public class AccountingApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Autowired
-    private MessageSource messageSource;
+    private MessageUtil messageUtil;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleNotFoundException() {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(EmptyBodyException.class)
+    public ResponseEntity<Object> handleEmptyBodyException() {
+        return new ResponseEntity<>(new ErrorResponseDTO(createMessageEmptyBody()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
+        var message = new StringBuilder();
+
+        if (ex.getCause() instanceof UnrecognizedPropertyException) {
+            message.append(createMessageUnrecognizedProperty((UnrecognizedPropertyException) ex.getCause()));
+        } else {
+            message.append("Illegal Argument Exception");
+        }
+
+        return new ResponseEntity<>(new ErrorResponseDTO(message.toString()), HttpStatus.BAD_REQUEST);
+    }
+
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers,
                                                                   HttpStatus status, WebRequest request) {
-
-        String propertyName;
-        String message = "";
+        var message = new StringBuilder();
 
         if (ex.getRootCause() instanceof UnrecognizedPropertyException) {
-            propertyName = ((UnrecognizedPropertyException) ex.getRootCause()).getPropertyName();
-            message = messageSource.getMessage("api.error.request.json.unrecognized.field", new String[]{propertyName},
-                    LocaleContextHolder.getLocale());
+            message.append(createMessageUnrecognizedProperty((UnrecognizedPropertyException) ex.getRootCause()));
+        } else {
+            message.append(createMessageEmptyBody());
         }
 
-        return handleExceptionInternal(ex, new ErrorResponseDTO(message), headers, HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(ex, new ErrorResponseDTO(message.toString()), headers, HttpStatus.BAD_REQUEST, request);
     }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<String> messages = ex.getBindingResult().getFieldErrors()
                 .stream()
-                .map(fieldError -> messageSource.getMessage(fieldError, LocaleContextHolder.getLocale()))
+                .map(fieldError -> messageUtil.getMessage(fieldError))
                 .collect(Collectors.toList());
 
         return handleExceptionInternal(ex, new ErrorResponseDTO(messages), headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    private String createMessageUnrecognizedProperty(UnrecognizedPropertyException ex) {
+        return messageUtil.getMessage("api.error.request.json.unrecognized.field", new String[]{ ex.getPropertyName() });
+    }
+
+    private String createMessageEmptyBody() {
+        return messageUtil.getMessage("api.error.request.empty.body");
     }
 }

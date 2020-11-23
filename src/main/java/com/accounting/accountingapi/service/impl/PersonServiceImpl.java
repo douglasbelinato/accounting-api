@@ -39,4 +39,35 @@ public class PersonServiceImpl implements PersonService {
             throw new ResourceNotFoundException();
         }
     }
+
+    @Override
+    public void update(Long id, Person person) {
+        if (person.getId() != id) {
+
+        }
+
+        personRepository.save(person);
+//        var personToBeUpdated = findById(id);
+//        System.out.println(personToBeUpdated);
+//
+//        if (jsonMap.isEmpty()) {
+//            throw new ResourceNotValidException();
+//        }
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Person personChanged = objectMapper.convertValue(jsonMap, Person.class);
+//
+//        jsonMap.forEach((propertyName, propertyValue) -> {
+//            var field = ReflectionUtils.findField(Person.class, propertyName);
+//            field.setAccessible(true);
+//
+//            var newValue = ReflectionUtils.getField(field, personChanged);
+//
+//            ReflectionUtils.setField(field, personToBeUpdated, newValue);
+//        });
+//
+//        System.out.println("personChanged=" + personChanged);
+//        System.out.println("personToBeUpdated=" + personToBeUpdated);
+//        personRepository.save(person);
+    }
 }
