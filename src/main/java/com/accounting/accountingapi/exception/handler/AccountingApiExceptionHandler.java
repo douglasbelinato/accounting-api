@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,11 @@ public class AccountingApiExceptionHandler extends ResponseEntityExceptionHandle
     @ExceptionHandler(EmptyBodyException.class)
     public ResponseEntity<Object> handleEmptyBodyException() {
         return new ResponseEntity<>(new ErrorResponseDTO(createMessageEmptyBody()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>(new ErrorResponseDTO("Erro"), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -73,7 +79,7 @@ public class AccountingApiExceptionHandler extends ResponseEntityExceptionHandle
     }
 
     private String createMessageUnrecognizedProperty(UnrecognizedPropertyException ex) {
-        return messageUtil.getMessage("api.error.request.json.unrecognized.field", new String[]{ ex.getPropertyName() });
+        return messageUtil.getMessage("api.error.request.json.unrecognized.field", ex.getPropertyName());
     }
 
     private String createMessageEmptyBody() {

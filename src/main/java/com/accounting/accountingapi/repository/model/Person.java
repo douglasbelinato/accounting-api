@@ -3,7 +3,6 @@ package com.accounting.accountingapi.repository.model;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "person")

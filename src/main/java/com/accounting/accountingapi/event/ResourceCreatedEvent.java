@@ -11,7 +11,7 @@ public class ResourceCreatedEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = -4173682947858245477L;
 
-    private HttpServletResponse response;
+    private transient HttpServletResponse response;
     private Long id;
 
     public ResourceCreatedEvent(Object source, HttpServletResponse response, Long id) {
