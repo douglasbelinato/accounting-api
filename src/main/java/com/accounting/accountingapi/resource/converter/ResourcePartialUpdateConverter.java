@@ -1,6 +1,7 @@
-package com.accounting.accountingapi.resource.converter;
+package com.accounting.accountingapi.resource.validation;
 
 import com.accounting.accountingapi.exception.EmptyBodyException;
+import com.accounting.accountingapi.resource.dto.PersonPartialUpdateDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ import javax.validation.Validator;
 import java.util.Map;
 
 @Component
-public class JsonToResourceConverter<T> {
+public class ResourcePartialUpdateValidator<T> {
 
     @Autowired
     private Validator validator;
@@ -38,5 +39,24 @@ public class JsonToResourceConverter<T> {
         } catch (IllegalArgumentException e) {
             // ????
         }
+    }
+
+    private void checkResourceNotEmpty(Map<String, Object> jsonMapResourceUpdated) {
+        if (jsonMapResourceUpdated.isEmpty()) {
+            throw new EmptyBodyException();
+        }
+    }
+
+    private void checkFieldsValid(Map<String, Object> jsonMapResourceUpdated) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.convertValue(jsonMapResourceUpdated, PersonPartialUpdateDTO.class);
+
+        String json = new ObjectMapper().writeValueAsString(jsonMapResourceUpdated);
+
+        var personDTO = personMapper.fromPersonModelToPersonDto(personService.findById(id));
+    }
+
+    private void checkExistsFieldsConstraintViolations() {
+
     }
 }

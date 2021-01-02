@@ -11,10 +11,6 @@ services:
       - ~/docker-volumes/mysql/data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: pass
-#      - MYSQL_ROOT_PASSWORD=pass
-#      - MYSQL_DATABASE=teste
-#      - MYSQL_USER=user
-#      - MYSQL_PASSWORD=pass
 
   db_tool_management:
     image: adminer
@@ -22,29 +18,29 @@ services:
     ports:
       - 8091:8080
 
-#  sonarqube:
-#    image: sonarqube:8.3.1-community
-#    container_name: 'sonarqube'
-#    ports:
-#      - 9000:9000
-#    environment:
-#      - sonar.jdbc.username=sonar
-#      - sonar.jdbc.password=sonar
-#      - sonar.jdbc.url=jdbc:postgresql://db_sonar/sonar
-#    volumes:
-#      - ~/docker-volumes/sonar/sonarqube_conf:/opt/sonarqube/conf
-#      - ~/docker-volumes/sonar/sonarqube_data:/opt/sonarqube/data
-#      - ~/docker-volumes/sonar/sonarqube_extensions:/opt/sonarqube/extensions
-#      - ~/docker-volumes/sonar/sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
-#    depends_on:
-#      - db_sonar
-#
-#  db_sonar:
-#    image: postgres
-#    container_name: 'postgres'
-#    environment:
-#      - POSTGRES_USER=sonar
-#      - POSTGRES_PASSWORD=sonar
-#    volumes:
-#      - ~/docker-volumes/sonar/postgres/postgresql:/var/lib/postgresql
-#      - ~/docker-volumes/sonar/postgres/postgresql_data:/var/lib/postgresql/data
+  sonarqube:
+    image: sonarqube:8.3.1-community
+    container_name: 'sonarqube'
+    ports:
+      - 9000:9000
+    environment:
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=sonar
+      - sonar.jdbc.url=jdbc:postgresql://db_sonar/sonar
+    volumes:
+      - ~/docker-volumes/sonar/sonarqube_conf:/opt/sonarqube/conf
+      - ~/docker-volumes/sonar/sonarqube_data:/opt/sonarqube/data
+      - ~/docker-volumes/sonar/sonarqube_extensions:/opt/sonarqube/extensions
+      - ~/docker-volumes/sonar/sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+    depends_on:
+      - db_sonar
+
+  db_sonar:
+    image: postgres
+    container_name: 'postgres'
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - ~/docker-volumes/sonar/postgres/postgresql:/var/lib/postgresql
+      - ~/docker-volumes/sonar/postgres/postgresql_data:/var/lib/postgresql/data
