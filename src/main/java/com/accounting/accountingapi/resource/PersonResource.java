@@ -1,14 +1,12 @@
 package com.accounting.accountingapi.resource;
 
 import com.accounting.accountingapi.event.ResourceCreatedEvent;
-import com.accounting.accountingapi.exception.EmptyBodyException;
 import com.accounting.accountingapi.mapper.PersonMapper;
-import com.accounting.accountingapi.repository.model.Person;
-import com.accounting.accountingapi.resource.converter.JsonToResourceConverter;
+import com.accounting.accountingapi.resource.converter.ResourcePartialUpdateConverter;
 import com.accounting.accountingapi.resource.dto.PersonDTO;
 import com.accounting.accountingapi.resource.dto.PersonPartialUpdateDTO;
 import com.accounting.accountingapi.service.PersonService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -16,12 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/people")
@@ -37,10 +32,7 @@ public class PersonResource {
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    private Validator validator;
-
-    @Autowired
-    private JsonToResourceConverter<PersonPartialUpdateDTO> personJsonToResourceConverter;
+    private ResourcePartialUpdateConverter<PersonDTO, PersonPartialUpdateDTO> personPartialUpdateConverter;
 
     @GetMapping
     public ResponseEntity<List<PersonDTO>> findAll() {
@@ -69,31 +61,12 @@ public class PersonResource {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Person> patch(@PathVariable Long id, @RequestBody Map<String, Object> jsonMapResourceUpdated) throws Throwable {
-//    public ResponseEntity<Person> patch(@PathVariable Long id, @RequestBody PersonPartiallyUpdatedDTO personPartiallyUpdatedDTO) throws Throwable {
-//        var personToBeUpdatedDTO = personMapper.fromPersonModelToPersonPatchDto(personService.findById(id));
-//
-//        personJsonToResourceConverter.fulfillResourceWithValues(jsonMapResourceUpdated, personToBeUpdatedDTO, PersonPartiallyUpdatedDTO.class);
-////        personService.update(id, personMapper.fromDtoToModel(personToBeUpdatedDTO));
-
-//        System.out.println(new ObjectMapper().writeValueAsString(personPartiallyUpdatedDTO));
-
-        if (jsonMapResourceUpdated.isEmpty()) {
-            throw new EmptyBodyException();
-        }
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.convertValue(jsonMapResourceUpdated, PersonPartialUpdateDTO.class);
-
-        String json = new ObjectMapper().writeValueAsString(jsonMapResourceUpdated);
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void patch(@PathVariable Long id, @RequestBody Map<String, Object> jsonMapResourceUpdated) throws JsonProcessingException {
         var personDTO = personMapper.fromPersonModelToPersonDto(personService.findById(id));
+        PersonDTO personUpdatedDTO = personPartialUpdateConverter.applyFieldsUpdatedToResource(jsonMapResourceUpdated, personDTO, PersonDTO.class, PersonPartialUpdateDTO.class);
 
-        PersonDTO personDTOUpdated = new ObjectMapper().readerForUpdating(personDTO).readValue(json);
-
-        Set<ConstraintViolation<PersonDTO>> violations = validator.validate(personDTOUpdated);
-        System.out.println(violations.toString());
-
-        return ResponseEntity.ok().build();
+        personService.update(personMapper.fromPersonDtoToPersonModel(personUpdatedDTO));
     }
+
 }

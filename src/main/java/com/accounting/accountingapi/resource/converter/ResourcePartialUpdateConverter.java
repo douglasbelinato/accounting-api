@@ -1,62 +1,65 @@
-package com.accounting.accountingapi.resource.validation;
+package com.accounting.accountingapi.resource.converter;
 
 import com.accounting.accountingapi.exception.EmptyBodyException;
-import com.accounting.accountingapi.resource.dto.PersonPartialUpdateDTO;
+import com.accounting.accountingapi.util.MessageUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.validation.SmartValidator;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.Map;
+import java.util.Set;
 
 @Component
-public class ResourcePartialUpdateValidator<T> {
+public class ResourcePartialUpdateConverter<R, P> {
 
     @Autowired
     private Validator validator;
 
-    private SmartValidator smartValidator;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    public void fulfillResourceWithValues(Map<String, Object> jsonMapResourceUpdated, T resourceToBeUpdate, Class<T> type) throws Throwable {
-        if (jsonMapResourceUpdated.isEmpty()) {
+    @Autowired
+    private MessageUtil messageUtil;
+
+    public R applyFieldsUpdatedToResource(Map<String, Object> fieldsUpdated, R resourceToBeUpdate,
+                                          Class<R> resourceToBeUpdateType, Class<P> partialUpdateModelType) throws JsonProcessingException {
+        R resourceToBeUpdateClone = deepCopy(resourceToBeUpdate, resourceToBeUpdateType);
+        checkResourceNotEmpty(fieldsUpdated);
+        checkFieldsValid(fieldsUpdated, partialUpdateModelType);
+        convert(fieldsUpdated, resourceToBeUpdateClone);
+        checkExistsFieldsConstraintViolations(resourceToBeUpdateClone);
+
+        return resourceToBeUpdateClone;
+    }
+
+    private R deepCopy(R resourceToBeUpdate, Class<R> resourceToBeUpdateType) throws JsonProcessingException {
+        var json = objectMapper.writeValueAsString(resourceToBeUpdate);
+        return objectMapper.readValue(json, resourceToBeUpdateType);
+    }
+
+    private void checkResourceNotEmpty(Map<String, Object> fieldsUpdated) {
+        if (fieldsUpdated.isEmpty()) {
             throw new EmptyBodyException();
         }
+    }
 
-        try {
-            final T resourceUpdated = new ObjectMapper().convertValue(jsonMapResourceUpdated, type);
+    private void checkFieldsValid(Map<String, Object> fieldsUpdated, Class<P> partialUpdateModelType) {
+        objectMapper.convertValue(fieldsUpdated, partialUpdateModelType);
+    }
 
-            jsonMapResourceUpdated.forEach((propertyName, propertyValue) -> {
-                var field = ReflectionUtils.findField(type, propertyName);
-                field.setAccessible(true);
+    private R convert(Map<String, Object> fieldsUpdated, R resourceToBeUpdate) throws JsonProcessingException {
+        var json = objectMapper.writeValueAsString(fieldsUpdated);
+        return objectMapper.readerForUpdating(resourceToBeUpdate).readValue(json);
+    }
 
-                var newValue = ReflectionUtils.getField(field, resourceUpdated);
-
-                ReflectionUtils.setField(field, resourceToBeUpdate, newValue);
-            });
-
-        } catch (IllegalArgumentException e) {
-            // ????
+    private void checkExistsFieldsConstraintViolations(R resourceUpdated) {
+        Set<ConstraintViolation<R>> violations = validator.validate(resourceUpdated);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
         }
-    }
-
-    private void checkResourceNotEmpty(Map<String, Object> jsonMapResourceUpdated) {
-        if (jsonMapResourceUpdated.isEmpty()) {
-            throw new EmptyBodyException();
-        }
-    }
-
-    private void checkFieldsValid(Map<String, Object> jsonMapResourceUpdated) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.convertValue(jsonMapResourceUpdated, PersonPartialUpdateDTO.class);
-
-        String json = new ObjectMapper().writeValueAsString(jsonMapResourceUpdated);
-
-        var personDTO = personMapper.fromPersonModelToPersonDto(personService.findById(id));
-    }
-
-    private void checkExistsFieldsConstraintViolations() {
-
     }
 }
