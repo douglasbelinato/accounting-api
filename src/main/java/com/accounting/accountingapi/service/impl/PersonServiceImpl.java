@@ -41,7 +41,7 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public void update(Person person) {
-        personRepository.save(person);
+    public Person update(Person person) {
+        return personRepository.save(person);
     }
 }
