@@ -15,8 +15,6 @@ public interface PersonMapper { // NOSONAR
 
     PersonDTO fromPersonModelToPersonDto(Person person);
 
-    PersonPartialUpdateDTO fromPersonModelToPersonPatchDto(Person person);
-
     List<PersonDTO> fromPersonModelListToPersonDtoList(List<Person> people);
 
     Person fromPersonDtoToPersonModel(PersonDTO dto);
