@@ -1,6 +1,6 @@
 package com.accounting.accountingapi;
 
-import com.accounting.accountingapi.resource.PersonResource;
+import com.accounting.accountingapi.interfaces.rest.PersonResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
